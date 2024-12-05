@@ -3,13 +3,15 @@ package blockchain
 import "fmt"
 
 type Chain struct {
-	Blocks []Block
+	Blocks     []Block
+	Difficulty int
 }
 
 // NewChain 创建一个新的区块链
 func NewChain() Chain {
 	chain := Chain{}
 	chain.Blocks = append(chain.Blocks, NewBlock("Genesis Block", ""))
+	chain.Difficulty = 1 // 初始难度是 1
 	return chain
 }
 
@@ -22,7 +24,9 @@ func (c *Chain) GetLastBlock() Block {
 func (c *Chain) AddBlockToChain(newBlock Block) {
 	lastBlock := c.GetLastBlock()
 	newBlock.PreviousHash = lastBlock.Hash
-	newBlock.Hash = newBlock.ComputeHash()
+	// 因为这里我们需要通过挖矿来计算区块的哈希值，所以这里这条代码需要注释掉，更新为挖矿代码，挖矿代码中会更新哈希值
+	//newBlock.Hash = newBlock.ComputeHash()
+	newBlock.mine(c.Difficulty) // 挖矿计算 Hash
 	c.Blocks = append(c.Blocks, newBlock)
 }
 
