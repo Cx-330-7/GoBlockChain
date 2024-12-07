@@ -3,23 +3,27 @@ package blockchain
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 )
 
-// Block 包含的数据有：1.数据 2.之前区块的哈希值 3.自己的哈希值 4.随机数
+// Block 包含的数据有：1.交易数组 2.之前区块的哈希值 3.自己的哈希值 4.随机数 5.时间戳
 type Block struct {
-	Data         string
+	Transactions []Transaction
 	PreviousHash string
 	Hash         string
+	Timestamp    int64
 	Nonce        int
 }
 
 // NewBlock 创建一个区块
-func NewBlock(data string, previousHash string) Block {
+func NewBlock(transaction []Transaction, previousHash string) Block {
 	block := Block{
-		Data:         data,
+		Transactions: transaction,
 		PreviousHash: previousHash,
+		Timestamp:    time.Now().Unix(),
 		Nonce:        1,
 	}
 	block.Hash = block.ComputeHash()
@@ -28,8 +32,10 @@ func NewBlock(data string, previousHash string) Block {
 
 // ComputeHash 计算当前区块的哈希值
 func (b *Block) ComputeHash() string {
+	// 将交易数组序列化为 JSON 字符串
+	transactionsJSON, _ := json.Marshal(b.Transactions)
 	hash := sha256.New() // 创建一个新的 SHA-256 哈希计算对象
-	hash.Write([]byte(b.Data + b.PreviousHash + strconv.Itoa(b.Nonce)))
+	hash.Write([]byte(string(transactionsJSON) + b.PreviousHash + strconv.Itoa(b.Nonce)))
 	return hex.EncodeToString(hash.Sum(nil))
 }
 

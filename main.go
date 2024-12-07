@@ -6,15 +6,28 @@ import (
 )
 
 func main() {
-	// 创建一个区块链
+	// 创建新的区块链
 	chain := blockchain.NewChain()
 
-	//创建新区块并添加到区块链
-	block1 := blockchain.NewBlock("转账十元", "")
-	chain.AddBlockToChain(block1)
+	// 添加交易
+	t1 := blockchain.Transaction{From: "addr1", To: "addr2", Amount: 10}
+	t2 := blockchain.Transaction{From: "addr2", To: "addr1", Amount: 5}
+	chain.AddTransaction(t1)
+	chain.AddTransaction(t2)
 
-	block2 := blockchain.NewBlock("转账三十元", "")
-	chain.AddBlockToChain(block2)
+	// 矿工地址
+	minerAddress := "addr3"
+	chain.MineTransactionPool(minerAddress)
 
-	fmt.Println(chain.ValidateChain())
+	// 打印区块链
+	for i, block := range chain.Blocks {
+		fmt.Printf("区块 %d: %+v\n", i, block)
+	}
+
+	// 验证区块链
+	if chain.ValidateChain() {
+		fmt.Println("区块链验证成功")
+	} else {
+		fmt.Println("区块链验证失败")
+	}
 }
