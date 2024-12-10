@@ -63,3 +63,14 @@ func (b *Block) mine(difficulty int) {
 	}
 	fmt.Println("挖矿结束", b.Hash)
 }
+
+// ValidateBlockTransactions 验证区块中的交易是否有效
+func (b *Block) ValidateBlockTransactions() bool {
+	for _, tx := range b.Transactions {
+		if !tx.IsValid() {
+			fmt.Println("非法交易")
+			return false
+		}
+	}
+	return true
+}

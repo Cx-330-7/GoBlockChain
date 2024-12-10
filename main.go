@@ -2,32 +2,44 @@ package main
 
 import (
 	"GoBlockChain/blockchain"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 )
 
 func main() {
-	// 创建新的区块链
+	// 初始化区块链
 	chain := blockchain.NewChain()
 
-	// 添加交易
-	t1 := blockchain.Transaction{From: "addr1", To: "addr2", Amount: 10}
-	t2 := blockchain.Transaction{From: "addr2", To: "addr1", Amount: 5}
-	chain.AddTransaction(t1)
-	chain.AddTransaction(t2)
+	// 生成公私钥对
+	privateKeySender, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	publicKeySender := append(privateKeySender.PublicKey.X.Bytes(), privateKeySender.PublicKey.Y.Bytes()...)
 
-	// 矿工地址
-	minerAddress := "addr3"
-	chain.MineTransactionPool(minerAddress)
+	privateKeyReceiver, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	publicKeyReceiver := append(privateKeyReceiver.PublicKey.X.Bytes(), privateKeyReceiver.PublicKey.Y.Bytes()...)
 
-	// 打印区块链
-	for i, block := range chain.Blocks {
-		fmt.Printf("区块 %d: %+v\n", i, block)
+	// 打印发送者和接收者的公钥
+	fmt.Println("Sender Public Key:", hex.EncodeToString(publicKeySender))
+	fmt.Println("Receiver Public Key:", hex.EncodeToString(publicKeyReceiver))
+
+	// 创建交易
+	tx := blockchain.Transaction{
+		From:   hex.EncodeToString(publicKeySender),
+		To:     hex.EncodeToString(publicKeyReceiver),
+		Amount: 10.5,
 	}
 
-	// 验证区块链
-	if chain.ValidateChain() {
-		fmt.Println("区块链验证成功")
-	} else {
-		fmt.Println("区块链验证失败")
+	// 签名交易
+	err1 := tx.Sign(privateKeySender)
+	if err1 != nil {
+		return
 	}
+
+	// 验证并添加交易
+	chain.AddTransaction(tx)
+	chain.MineTransactionPool(hex.EncodeToString(publicKeyReceiver))
+	chain.Blocks[1].Transactions[0].Signature = "ssdsdw" //篡改交易内容
+	fmt.Println(chain.ValidateChain())
 }

@@ -58,6 +58,11 @@ func (c *Chain) ValidateChain() bool {
 	}
 	for i := 1; i < len(c.Blocks); i++ {
 		blockToValidate := c.Blocks[i]
+		// 验证区块中的交易是否合法（检查数字签名）
+		if !blockToValidate.ValidateBlockTransactions() {
+			fmt.Println("区块中的交易不合法")
+			return false
+		}
 		//验证区块数据是否被篡改
 		if blockToValidate.Hash != blockToValidate.ComputeHash() {
 			fmt.Println("数据篡改")
@@ -72,15 +77,3 @@ func (c *Chain) ValidateChain() bool {
 	}
 	return true
 }
-
-/*
-// AddBlockToChain 向区块链中加入新块，因为有了MineTransactionPool方法，所以不再需要这个方法了
-func (c *Chain) AddBlockToChain(newBlock Block) {
-	lastBlock := c.GetLastBlock()
-	newBlock.PreviousHash = lastBlock.Hash
-	// 因为这里我们需要通过挖矿来计算区块的哈希值，所以这里这条代码需要注释掉，更新为挖矿代码，挖矿代码中会更新哈希值
-	//newBlock.Hash = newBlock.ComputeHash()
-	newBlock.mine(c.Difficulty) // 挖矿计算 Hash
-	c.Blocks = append(c.Blocks, newBlock)
-}
-*/
