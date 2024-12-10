@@ -74,6 +74,11 @@ func (c *Chain) ValidateChain() bool {
 			fmt.Println("前后区块链接断裂")
 			return false
 		}
+		// 验证区块中的交易是否合法（检查数字签名）
+		if !blockToValidate.ValidateBlockTransactions() {
+			fmt.Println("区块中的交易不合法")
+			return false
+		}
 	}
 	return true
 }
